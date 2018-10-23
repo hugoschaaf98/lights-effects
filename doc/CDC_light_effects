@@ -1,0 +1,78 @@
+/*Description du projet "light effects"
+* Cela consiste à une gestion automatisée 
+* des jeux de lumière à l'intérieur d'une tour 
+* d'ordinateur. L'utilisateur dispose aussi d'une
+* interface graphique minimaliste pour personnaliser
+* la configuration de son éclairage.
+* Le module de contrôle des leds est connecté au pc
+* via un port USB2.0.
+* L'éclairage est composé de 2 rubans à led de couleur
+* différente, contrôlés chacun indépendamment.*/
+
+--------------------------Comportement--------------------------------------
+
+- à la mise sous tension du pc :
+	lorsque le pc est mis sous tension, l'éclairage
+	est à 50% de sa luminosité globale. La couleur 1
+	et la couleur 2 sont égalisées à 50%.
+
+- au démarrage de l'OS :
+	le programme de gestion de l'éclairage est lancé automatiquement.
+	il envoie les informations de niveaux de couleurs et de luminosité
+	au module par communication série via l'USB. La configuration standart
+	est stockée dans un fichier de configuration du programme. C'est ce
+	fichier qui est chargé au démarrage de l'application pour déterminer
+	le comportement de l'éclairage.
+
+- en fonctionnement normal :	
+	Le choix de la luminosité est fait en fonction de l'heure locale
+	et de la saison selon les critères suivants :
+
+		/- plus il est tard plus une des 2 couleurs est intense
+		   et inversement pour la couleur restante.
+
+	Les informations sur les niveaux de couleurs et la luminosité sont
+	ecrits dans un fichier temporaire mis à jour toutes les demi heures.
+	Les données de ce fichier sont lues à chaque màj de ce dernier et
+	envoyées au module d'éclairage via la liaison série.
+	
+	A tout moment, l'utilisateur peut lancer l'interface graphique
+	ce qui lui permettra de modifier s'il le souhaite le fichier de
+	configuration.
+
+---------------------------Description des fichiers-------------------------
+
+- fichier de config standart :
+	ce fichier contient dans l'ordre :
+		/- la date du jour
+		/- l'heure de la tombée de la nuit et du levé du jour
+		/- la luminosité à l'allumage                 (de 0 à 255)
+		/- les niveaux de couleurs à l'allumage       (de 0 à 255)
+		/- la luminosité min et max en fonctionnement (idem)
+		/- les niveaux de couleurs en fonctionnement  (idem)
+
+- fichier temporaire :
+	ce fichier contient uniquement les informations en temps réel.
+	On y retrouve la luminosité globale et les niveaux de couleurs.
+
+-----------------------------Interface graphique----------------------------
+
+L'interface graphique se veut minimaliste. Une petite fenêtre NON 
+redimensionnable affichant : 
+	/- la date du jour	
+	/- l'heure du couché et du levé du soleil
+	/- un curseur pour modifier la luminosité globale (affichage en % à
+	   coté du curseur)
+	/- un curseur allant d'une couleur à une autre sans passer par des
+	   des couleurs intermediaires (une pastille de chaque couleur de
+	   chaque côté du curseur ainsi qu'un affichage en % du niveau de
+	   couleur à côté de chaque pastille)
+
+/*J'espère que c'est clair et que tu vas prendre plaisir à faire ce petit projet
+* cool qu'on pourra commercialiser au Quatar où l'on fera fortune !
+* 
+* SCHAAF Hugo
+* 20/07/2017 edition 1.0 du cahier des charges
+*/
+ 
+	
