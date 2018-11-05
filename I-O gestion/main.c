@@ -9,13 +9,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
 
 #include <termios.h>
-#include <sys/ioctl.h>/*for ioctl() */
 #include "serialio_unix.h"
+#include "defines.h"
 
 /*serial communication speed*/
 #define MY_BAUD_RATE B9600	/* according to termios */
+
 
 /*******************************************/
 /*                BEGINNING		           */
@@ -23,69 +26,58 @@
 
 int main(int argc, char **argv){
 
-	int fd;
-	int sio_status;
-
-	int attempts = 0;
+	int ttyUSBS_fd;
 
 	/*** Serial port initialization ***/
-	struct termios oldserial;
-	struct termios* oldserial_p = &oldserial;
-	
-	/*if no argument has been passed*/	
-	if(argc <= 1){
-		puts("\n/!\\Please specifie a serial port to open/!\\\n\n~~ Nothing to do.\n");
-		return EXIT_SUCCESS;
+	struct termios old_usb_serial;
+	struct termios* old_usb_serial_p = &old_usb_serial;
+		
+	if(argc <= 1)/*if no argument has been passed*/
+	{
+		puts("\n/!\\Please specifie a serial port to open/!\\\nAborting.\n");
+		exit(EXIT_FAILURE);
 	}/* end if */
-
-
-	/*if open failed*/
-	if((fd = sio_open(argv[1], O_RDONLY | O_NOCTTY | O_NONBLOCK))==-1){
-		attempts++;
+	
+	if((ttyUSBS_fd = sio_open(PATH, O_RDONLY | O_NOCTTY) )==-1)/*if open failed*/
+	{
 		perror("sio_open()");
+		printf("Please make sure that <%s> refers to a <%s> device.\n", PATH, DV_NAME);
+		exit(EXIT_FAILURE);
 	}/*end if*/
 
-	else{
-		/* get the status of the port to look if
-		 * a device is connected
-		 */
-
-		bool device_connected = true;
-
-		puts("\033[2J");/* just clear the terminal */
-
-		while(device_connected){
-
-			/* look if ioctl failed -> device disconnected */
-			/* see tty_ioctl man page for more information about
-			 * the commands as TIOCMGET follows
-			 */
-			if(ioctl(fd, TIOCMGET, &sio_status)==-1){
-				perror("ioctl");
-				device_connected = false;
-				printf("the device on %s has been disconnected\n", argv[1]);
-			}/* end if */
-			else{
-				/*print the status of the opened-port*/
-				puts("\033[1;1H");/*clear the terminal and move the cursor to 1;1 */
-				printf("Current opend-port : %s\n", argv[1]);	
-
-			}/*end else*/
-
-		}/* end while */			
-
-		/*close the port*/
-		close(fd);
-
-	}/*end else*/
-
-	int fd = sio_open(.......);
-
 	/*save the old serial port settings*/
-	save_old_tty(fd, oldserial_p);
+	save_old_tty(ttyUSBS_fd, old_usb_serial_p);
 
 	/*set new attributes for the serial communication*/
-	//sio_init(fd, MY_BAUD_RATE);
+	sio_init(ttyUSBS_fd, MY_BAUD_RATE);
+
+	char buf[20] = "";
+
+	/* identify the device */
+	sio_puts(ttyUSBS_fd, "name");
+	sio_read(ttyUSBS_fd, buf, 20);
+
+	if( strncmp(buf, DV_NAME,sizeof(DV_NAME)/sizeof(char)) > 0 )/*if it's the proper device*/
+	{
+		printf("<%s> found at <%s>\n", DV_NAME, PATH);
+
+		/* load the settings */
+		FILE* lights_settings = NULL;
+
+		if( (lights_settings = fopen("../settings.lights")) )/* if the lights settings file exists */
+		{
+			/* retreive the commands to send */
+			fclose(lights_settings);
+
+		}
+
+		/* send the commands */
+
+
+	}/* end if it's the proper device */
+	
+
+	close(ttyUSBS_fd);
 
 	return EXIT_SUCCESS;
 }

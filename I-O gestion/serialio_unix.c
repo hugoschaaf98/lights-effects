@@ -68,9 +68,11 @@ int sio_read(int fd, char* buf, size_t count){
 	else return char_received;
 }/* end sio_read() */
 
-int sio_write(int fd, const char* buf, size_t count){
+int sio_puts(int fd, const char* buf){
 
 	int char_written = 0;
 
-	if( (char_written = (int)write(fd, buf, count)) == -1 )
+	if( (char_written = (int)write(fd, buf, sizeof(s)) == -1 ) )
+
+	return char_written;
 }/* end sio_write */

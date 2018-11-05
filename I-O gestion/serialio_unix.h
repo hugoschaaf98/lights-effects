@@ -47,6 +47,6 @@ int sio_open(const char* path, int o_flags);
  * but to make the prog clear
  */
 int sio_read(int fd, char* buf, size_t count);
-/*int sio_write(int fd, const char* buf, size_t count);*/
+int sio_puts(int fd, const char* buf);
 
 #endif
