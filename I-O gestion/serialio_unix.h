@@ -32,16 +32,15 @@
 #define save_old_tty(fd, ptr) tcgetattr(fd, ptr)
 #define restore_old_tty(fd, ptr) tcsetattr(fd, ptr, TCSANOW) /*with TCSANOW, restore the old terminal immediatly*/
 
-
-/*Initialize the serial io port*/
-int sio_init(int fd, speed_t baud);
-
 /* to open the serial port specified by "path".
  * o_flags are the same that the open(2) system call
  * uses (O_RDWR, O_NOCTTY, O_NONBLOCK ans do on).
  * return a file descriptor
  */
 int sio_open(const char* path, int o_flags);
+
+/*Initialize the serial io port*/
+int sio_init(int fd, speed_t baud);
 
 /* read and write operations.
  * simply use of read() and write() system calls
