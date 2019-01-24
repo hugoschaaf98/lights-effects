@@ -39,6 +39,7 @@ int sio_init(int fd, speed_t baud);
 /* to open the serial port specified by "path".
  * o_flags are the same that the open(2) system call
  * uses (O_RDWR, O_NOCTTY, O_NONBLOCK ans do on).
+ * return a file descriptor
  */
 int sio_open(const char* path, int o_flags);
 
@@ -46,7 +47,10 @@ int sio_open(const char* path, int o_flags);
  * simply use of read() and write() system calls
  * but to make the prog clear
  */
-int sio_read(int fd, char* buf, size_t count);
-int sio_puts(int fd, const char* buf);
+int sio_read(int fd, char* buf, int count);
+int sio_write(int fd, const char* buf, int count);
+
+char* sio_gets(int fd, char* buf);
+int sio_puts(int fd, const char* s);
 
 #endif

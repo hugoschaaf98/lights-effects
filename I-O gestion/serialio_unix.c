@@ -3,7 +3,8 @@
  */
 #include "serialio_unix.h"
 
-int sio_init(int fd, speed_t baud){/*to initialize the serial i/o */
+int sio_init(int fd, speed_t baud)/*to initialize the serial i/o */
+{
 
 
 	/*initialization of the termios structure*/
@@ -32,7 +33,7 @@ int sio_init(int fd, speed_t baud){/*to initialize the serial i/o */
 	cfsetospeed(myserial_ptr, baud);
 
 	/* settings of the non canonical input */
-	myserial.c_cc[VMIN] = 0; /* minimum number of character received before a read() returns */
+	myserial.c_cc[VMIN] = 1; /* minimum number of character received before a read() returns */
 	myserial.c_cc[VTIME] = 1;/* timeout before a read() returns */
 
 	/*apply settings*/
@@ -44,11 +45,13 @@ int sio_init(int fd, speed_t baud){/*to initialize the serial i/o */
 
 }/*end of sio_init(....) */
 
-int sio_open(const char* path, int o_flags){
+int sio_open(const char* path, int o_flags)
+{
 
 	int fd;
 
-	if( (fd = open(path, o_flags, 0)) == -1){
+	if( (fd = open(path, o_flags, 0)) == -1)
+	{
 		perror("sio_open unable to open specified port");
 		return -1;
 	}
@@ -57,22 +60,54 @@ int sio_open(const char* path, int o_flags){
 
 }/*end of sio_open(.....) */
 
-int sio_read(int fd, char* buf, size_t count){
+
+
+
+int sio_read(int fd, char* buf, int count)
+{
 
 	int char_received = 0;
 	
-	if( (char_received = (int)read(fd, buf, count)) == -1){
+	if( (char_received = (int)read(fd, buf, count)) == -1)
+	{
 		perror("read() in sio_read()");
 		return -1;
 	}
 	else return char_received;
 }/* end sio_read() */
 
-int sio_puts(int fd, const char* buf){
+int sio_write(int fd, const char* buf, int count)
+{
 
 	int char_written = 0;
 
-	if( (char_written = (int)write(fd, buf, sizeof(s)) == -1 ) )
+	if( (char_written = (int)write(fd, buf, count) != count ) )
+	{
+		perror("read() in sio_puts()");
+		return -1;
+	}
 
 	return char_written;
 }/* end sio_write */
+
+char* sio_gets(int fd, char* buf)
+{
+	for(read(fd, buf, 1); *buf != '\0'; buf++)
+	{
+		read(fd, buf, 1);
+	}
+
+	return buf;
+}
+
+int sio_puts(int fd, const char* s)
+{
+	int count = 0;
+	for(; *s != '\0'; s++)
+	{
+		write(fd, s, 1);
+		count++;
+	}
+
+	return count;
+}
