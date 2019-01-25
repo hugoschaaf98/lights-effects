@@ -27,6 +27,11 @@
 
 #define MAXNAME 20
 #define MAXPATH 20
+// commands
+#define DCGETID 0x01
+#define DCDSCT	0x02
+
+
 struct Device
 {
 	char name[MAXNAME];

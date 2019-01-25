@@ -46,8 +46,8 @@ int sio_init(int fd, speed_t baud);
  * simply use of read() and write() system calls
  * but to make the prog clear
  */
-int sio_read(int fd, char* buf, int count);
-int sio_write(int fd, const char* buf, int count);
+int sio_read(int fd, void* buf, int count);
+int sio_write(int fd, const void* buf, int count);
 
 char* sio_gets(int fd, char* buf);
 int sio_puts(int fd, const char* s);

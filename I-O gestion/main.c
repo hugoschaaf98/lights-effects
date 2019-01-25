@@ -55,9 +55,8 @@ int main(int argc, char **argv){
 	}
 
 	/* send the commands */
-	
 
-	close(ttyUSBS_fd);
+	dev_disconnect(device_ptr):
 
 	return EXIT_SUCCESS;
 }

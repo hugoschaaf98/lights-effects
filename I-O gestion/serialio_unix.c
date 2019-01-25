@@ -61,59 +61,44 @@ int sio_init(int fd, speed_t baud)/*to initialize the serial i/o */
 }/*end of sio_init(....) */
 
 
-int sio_read(int fd, char* buf, int count)
+int sio_read(int fd, void* buf, int count)
 {
-
-	int char_received = 0;
-	
-	if( (char_received = (int)read(fd, buf, (size_t)count)) == -1)
+	int bytes_received = 0;
+	if( (bytes_received = (int)read(fd, buf, (size_t)count)) == -1)
 	{
 		perror("read() in sio_read()");
 		return -1;
 	}
-	else return char_received;
+	else return bytes_received;
 }/* end sio_read() */
 
-int sio_write(int fd, const char* buf, int count)
+int sio_write(int fd, const void* buf, int count)
 {
-
-	int char_written = 0;
-
-	if( (char_written = (int)write(fd, buf, (size_t)count)) != count )
+	int bytes_written = 0;
+	tcflush(fd, TCOFLUSH);
+	if( (bytes_written = (int)write(fd, buf, (size_t)count)) != count )
 	{
 		perror("read() in sio_puts()");
 		return -1;
 	}
-	//tcflush(fd, TCOFLUSH);
-
-	return char_written;
+	return bytes_written;
 }/* end sio_write */
 
 char* sio_gets(int fd, char* buf)
 {
-	// int res = 1;
-	// while(res != 0)
-	// {
-	// 	res = read(fd, buf, 1);
-	// 	buf++;
-	// 	printf("char received res : %d\n", res);
-	// }
-
 	for(;read(fd, buf,1) > 0; buf++)
 	{;;}
-	tcflush(fd, TCIFLUSH);
 	return buf;
 }
 
 int sio_puts(int fd, const char* s)
 {
+	tcflush(fd, TCOFLUSH);
 	int count = 0;
 	for(; *s != '\0'; s++)
 	{
 		write(fd, s, 1);
 		count++;
 	}
-	//tcflush(fd, TCOFLUSH);
-
 	return count;
 }
