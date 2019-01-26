@@ -19,7 +19,7 @@
 
 
 // serial communication speed
-#define MY_BAUD_RATE B9600	// according to termios
+#define BAUD_RATE B9600	// according to termios
 
 
 /*******************************************/
@@ -28,35 +28,38 @@
 
 int main(int argc, char **argv){
 
+	struct termios old_tty;
+
 	Device device;
 	Device* device_ptr = &device;
 
-	//------------------------------------------------------------------------------------------------------//
-	// Initialization
-
-	dev_init(device_ptr);
-		
 	if(argc <= 1)//if no argument have been passed
 	{
 		puts("\n/!\\Please specifie a serial port to open/!\\\nAborting.\n");
 		exit(EXIT_FAILURE);
 	}
 
-	dev_connect(device_ptr);
+	//------------------------------------------------------------------------------------------------------//
+	// Initialization
 
-	/* load the settings */
-	FILE* lights_settings = NULL;
+	devInit(device_ptr, "lights-controller", argv[1], BAUD_RATE, &old_tty);
 
-	if( (lights_settings = fopen("../settings.lights")) )/* if the lights settings file exists */
+	if(devConnect(device_ptr) == device_ptr)
 	{
-		/* retreive the commands to send */
-		fclose(lights_settings);
+		// /* load the settings */
+		// FILE* lights_settings = NULL;
 
+		// if( (lights_settings = fopen("../settings.lights")) )/* if the lights settings file exists */
+		// {
+		// 	/* retreive the commands to send */
+		// 	fclose(lights_settings);
+
+		// }
+
+		// /* send the commands */
+
+		devDisconnect(device_ptr);
 	}
-
-	/* send the commands */
-
-	dev_disconnect(device_ptr):
 
 	return EXIT_SUCCESS;
 }

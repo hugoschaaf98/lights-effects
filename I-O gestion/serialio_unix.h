@@ -16,6 +16,12 @@
 # error please select the proper header file for your OS
 #endif
 
+#ifdef DEBUG
+    #define dbg(...) fprintf(stderr, __VA_ARGS__)
+#else
+    #define dbg(...)
+#endif
+
 /* specifics headers */
 #include <fcntl.h>
 #include <termios.h>
@@ -30,7 +36,7 @@
 
 /*macros to make more readable*/
 #define save_old_tty(fd, ptr) tcgetattr(fd, ptr)
-#define restore_old_tty(fd, ptr) tcsetattr(fd, ptr, TCSANOW) /*with TCSANOW, restore the old terminal immediatly*/
+#define restore_old_tty(fd, ptr) tcsetattr(fd, TCSANOW, ptr) /*with TCSANOW, restore the old terminal immediatly*/
 
 /* to open the serial port specified by "path".
  * o_flags are the same that the open(2) system call
