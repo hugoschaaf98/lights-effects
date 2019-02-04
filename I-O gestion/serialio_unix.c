@@ -10,7 +10,7 @@ int sio_open(const char* path, int o_flags)
 
 	if( (fd = open(path, o_flags, 0)) == -1)
 	{
-		perror("sio_open unable to open specified port");
+		fprintf(stderr, "sio_open unable to open specified port\n");
 		return -1;
 	}
 	
@@ -56,7 +56,6 @@ int sio_init(int fd, speed_t baud)/*to initialize the serial i/o */
 	tcsetattr(fd, TCSANOW, myserial_ptr);/*apply now*/
 
 	return fd;
-
 
 }/*end of sio_init(....) */
 

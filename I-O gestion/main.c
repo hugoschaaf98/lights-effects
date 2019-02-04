@@ -1,5 +1,14 @@
-/* prog.c 
- * to test the lib serialio_unix
+/* main.c
+ *
+ *
+ * Control the lights controller
+ * 
+ * Name of the device : LCxyzhs
+ * LC 	: Lights Controller
+ * x	: number of colors controlled
+ * y	: operting voltage (5 for 5 volts, 3 for 3.3 volts)
+ * z 	: version
+ * hs 	: Hugo SCHAAF, producer
  *
  * 11/08/2017
  * version 1.0
@@ -8,18 +17,15 @@
 // common headers //
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <unistd.h>
-#include <string.h>
 #include <termios.h>
+#include <string.h>
 
 #include "serialio_unix.h"
 #include "devicectl.h"
-#include "defines.h"
-
 
 // serial communication speed
-#define BAUD_RATE B9600	// according to termios
+#define BAUD B9600	// according to termios
 
 
 /*******************************************/
@@ -42,7 +48,7 @@ int main(int argc, char **argv){
 	//------------------------------------------------------------------------------------------------------//
 	// Initialization
 
-	devInit(device_ptr, "lights-controller", argv[1], BAUD_RATE, &old_tty);
+	devInit(device_ptr, "LC251hs", argv[1], BAUD, &old_tty);
 
 	if(devConnect(device_ptr) == device_ptr)
 	{

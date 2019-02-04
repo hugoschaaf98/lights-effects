@@ -6,7 +6,7 @@
 static void devSendCmd(int fd, int cmd)
 {
 	char tmp[CMDMAXSIZE] = "";
-	sprintf(tmp, "CMD::%d;", cmd);// send formatted command
+	sprintf(tmp, "CMD %d ;", cmd);// send formatted command
 	sio_puts(fd, tmp);
 }
 
@@ -27,7 +27,13 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	// check the name of each string
 	if(strlen(name) > MAXNAME || strlen(path) > MAXPATH)
 	{
-		perror("dev_init(). Lenght of name > MAXNAME or path > MAXPATH. See devicectl.h\n");
+		fprintf(stderr, "dev_init(). Lenght of name > MAXNAME or path > MAXPATH. See devicectl.h\n");
+		return NULL;
+	}
+
+	if(old_tty_ptr == NULL)
+	{
+		fprintf(stderr, "dev_init(). struct termios* can't be NULL.\n");
 		return NULL;
 	}
 
@@ -64,7 +70,7 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	devGetResp(dev->fd, io_buf);	// get the response of the device
 
 	// check the device's identity
-	sscanf(io_buf, "ID:: %s ;", io_buf);						// retreive the device's name
+	sscanf(io_buf, "ID %s ;", io_buf);						// retreive the device's name
 	if( strncmp(io_buf, dev->name, strlen(dev->name)) == 0 )	// if names equal (discount the '\0' of dev->name)
 	{ 
 		printf("<%s> found at <%s> successfully connected.\n", dev->name, dev->path);
@@ -91,7 +97,7 @@ Device* devDisconnect(Device* dev)
 	{
 		devSendCmd(dev->fd, DCDSCT);		// send disconnect command
 		devGetResp(dev->fd, buf);			// get the response of the device
-		sscanf(buf, "RESP:: %d ;", &cmd);	// parse the response
+		sscanf(buf, "RESP %d ;", &cmd);		// parse the response
 		putchar('.');
 		attempts++;
 	}
@@ -100,14 +106,14 @@ Device* devDisconnect(Device* dev)
 	// if 5 attempts to disconnect reached, return error.
 	if(attempts == 5)
 	{
-		puts("\nCan't disconnect the device.\n");
+		fprintf(stderr, "\nCan't disconnect the device.\n");
 		return NULL;
 	}
 
 	// else restore the tty
-	tcsetattr(dev->fd, TCSANOW, dev->old_tty_ptr);
+	restore_old_tty(dev->fd, dev->old_tty_ptr);
 	close(dev->fd);
-	printf("<%s> at <%s> successfully disconnected.\n", DV_NAME, dev->path);
+	printf("<%s> at <%s> successfully disconnected.\n", dev->name , dev->path);
 	return dev;
 }
 

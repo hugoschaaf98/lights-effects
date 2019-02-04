@@ -13,37 +13,19 @@
 # error "please select the proper header file for your OS\n"
 #endif
 
-#ifdef DEBUG
-    #define dbg(...) fprintf(stderr, __VA_ARGS__)
-#else
-    #define dbg(...)
-#endif
-
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
 
 #include "serialio_unix.h"
+#include "devicecmd.h"
 
-
-#define DV_NAME "lights-controller" // name of the device
-
-
-/*
- * message syntax : ANSWER_TYPE:: CONTENT ;
- */
-
-#define CMDMAXSIZE 50
-#define MSGMAXSIZE 50
-#define MAXNAME 20
-#define MAXPATH 20
-
-// commands
-#define DCGETID 0x01
-#define DCCNCT	0x02 // device connected
-#define DCDSCT	0x03 // device disconnected
+#ifdef DEBUG
+    #define dbg(...) fprintf(stderr, __VA_ARGS__)
+#else
+    #define dbg(...)
+#endif
 
 
 struct Device
@@ -55,6 +37,13 @@ struct Device
 	struct termios* old_tty_ptr;
 };
 typedef struct Device Device;
+
+struct DevMsg
+{
+	int type;
+	char msg[MAXMSGSIZE];
+};
+typedef struct DevMsg DevMsg;
 
 Device* devInit(Device* dev, const char* name, const char* path, int baud, struct termios* old_tty_ptr);
 Device* devConnect(Device* device);
