@@ -4,7 +4,7 @@
  * to communicate with a 
  * lights controller device
  *
- * message syntax : ANSWER_TYPE CONTENT ;
+ * message syntax : ANSWER_TYPE:CONTENT;
  * 
  * SCHAAF Hugo
  * 29/01/2019

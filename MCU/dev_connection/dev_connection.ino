@@ -19,10 +19,9 @@ int8_t getCmd()
     while(!Serial.available())
     {;;}
     *tmp = Serial.read();
-    Serial.print(*tmp);
   }while(*tmp++ != ';' && tmp-buf < CMDMAXSIZE);
 
-	scanf(buf,"CMD %d ;", &cmd);
+	sscanf(buf,"CMD %d ;", &cmd);
 
 	return cmd;
 }
@@ -34,28 +33,40 @@ int8_t getCmd()
 void setup()
 {
 	Serial.begin(9600);
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
 }
 
 void loop()
 {
-	int8_t cmd = DCERR;
+	int8_t cmd;
+
+  digitalWrite(13, LOW);
 
 	if(Serial.available())
 	{
-    Serial.println(Serial.available());
 		cmd = getCmd();
-
-    Serial.println("\ncmd : "+String{cmd});
    
   	switch(cmd)
   	{
   		case DCGETID :
-  
+
+        digitalWrite(13, HIGH);
+        delay(500);
   			Serial.print("ID LC251hs ;");
+        break;
+
+      case DCDSCT :
+
+        digitalWrite(13, HIGH);
+        delay(500);
+        Serial.print(String{DCDSCT}+';'); 
+        break;
   
   		default:
-        Serial.println("DCERR");
+        Serial.print("DCERR;");
   	}
 	}
+
   Serial.flush();
 }

@@ -48,8 +48,8 @@ int sio_init(int fd, speed_t baud)/*to initialize the serial i/o */
 	cfsetospeed(myserial_ptr, baud);
 
 	/* settings of the non canonical input */
-	myserial.c_cc[VMIN] = 0; /* minimum number of character received before a read() returns */
-	myserial.c_cc[VTIME] = 10;/* timeout before a read() returns */
+	myserial.c_cc[VMIN] = 1; /* minimum number of character received before a read() returns */
+	//myserial.c_cc[VTIME] = 10;/* timeout before a read() returns */
 
 	/*apply settings*/
 	tcflush(fd, TCIOFLUSH);/*clear the input an output buffers*/

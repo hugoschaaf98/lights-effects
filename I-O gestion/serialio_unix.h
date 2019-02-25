@@ -16,11 +16,11 @@
 # error please select the proper header file for your OS
 #endif
 
-#ifdef DEBUG
-    #define dbg(...) fprintf(stderr, __VA_ARGS__)
-#else
-    #define dbg(...)
-#endif
+// #ifdef DEBUG
+//     #define dbg(...) fprintf(stderr, __VA_ARGS__)
+// #else
+//     #define dbg(...)
+// #endif
 
 /* specifics headers */
 #include <fcntl.h>

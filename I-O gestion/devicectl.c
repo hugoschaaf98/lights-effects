@@ -3,20 +3,22 @@
 //-----------------------------------------------------------------------------------------------------
 // private functions
 //
-static void devSendCmd(int fd, int cmd)
+static void devWriteCmd(int fd, int cmd)
 {
 	char tmp[CMDMAXSIZE] = "";
 	sprintf(tmp, "CMD %d ;", cmd);// send formatted command
 	sio_puts(fd, tmp);
 }
 
-static void devGetResp(int fd, char* buf)
+static void devReadMsg(int fd, char* buf)
 {
 	// retreive characters until ';' is encountered
-	for(; read(fd, buf, 1); buf++)
+	int count =  0;
+	do
 	{
-		if(*buf == ';') break;
-	}
+		count+=sio_read(fd, buf, 1);
+		dbg("\n-- : %c", *buf);
+	}while(*buf++ != ';' && count < MSGMAXSIZE);
 }
 
 
@@ -45,9 +47,14 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	return dev;
 }
 
+//-----------------------------------------------------------------------------------------
+// connect the device to the Pc
+// return dev on succes or NULL on fail
+//
  Device* devConnect(Device* dev)
 {
 
+	dbg("connection\n");
 	// try to open the port 
 	dev->fd = sio_open(dev->path, O_RDWR | O_NOCTTY);
 
@@ -64,13 +71,17 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 
 	// identify the device
 	char io_buf[MSGMAXSIZE] = "";	// device name's container
-	tcflush(dev->fd, TCIOFLUSH);	// flush both input/output to avoid errors
-	devSendCmd(dev->fd, DCGETID);	// get the device identifier
+	tcflush(dev->fd, TCIOFLUSH);	// flush both input/output buffers to avoid errors
+	dbg("write\n");
+	devWriteCmd(dev->fd, DCGETID);	// get the device identifier
 	tcdrain(dev->fd);				// wait the transmission to complete
-	devGetResp(dev->fd, io_buf);	// get the response of the device
+	dbg("read\n");
+	devReadMsg(dev->fd, io_buf);	// get the response of the device
 
+	dbg("\nretreive device's ID\n");
 	// check the device's identity
 	sscanf(io_buf, "ID %s ;", io_buf);						// retreive the device's name
+	
 	if( strncmp(io_buf, dev->name, strlen(dev->name)) == 0 )	// if names equal (discount the '\0' of dev->name)
 	{ 
 		printf("<%s> found at <%s> successfully connected.\n", dev->name, dev->path);
@@ -79,11 +90,16 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	else // if the device's name doesn't match -> error
 	{
 		restore_old_tty(dev->fd, dev->old_tty_ptr);
+		close(dev->fd);
 		fprintf(stderr, "Unable to connect.\nPlease make sure that <%s> refers to the proper device.\n", dev->path);
 		return NULL;
 	}
-}// end connect()
+}// end devConnect()
 
+//-----------------------------------------------------------------------------------------
+// disconnect the device to the Pc
+// return dev on succes or NULL on fail
+//
 Device* devDisconnect(Device* dev)
 {
 	tcflush(dev->fd, TCIOFLUSH);
@@ -95,9 +111,9 @@ Device* devDisconnect(Device* dev)
 	int attempts = 0;
 	do
 	{
-		devSendCmd(dev->fd, DCDSCT);		// send disconnect command
-		devGetResp(dev->fd, buf);			// get the response of the device
-		sscanf(buf, "RESP %d ;", &cmd);		// parse the response
+		devWriteCmd(dev->fd, DCDSCT);		// send disconnect command
+		devReadMsg(dev->fd, buf);			// get the response of the device
+		sscanf(buf, "%d;", &cmd);		// parse the response
 		putchar('.');
 		attempts++;
 	}
@@ -113,9 +129,6 @@ Device* devDisconnect(Device* dev)
 	// else restore the tty
 	restore_old_tty(dev->fd, dev->old_tty_ptr);
 	close(dev->fd);
-	printf("<%s> at <%s> successfully disconnected.\n", dev->name , dev->path);
+	printf("\n<%s> at <%s> successfully disconnected.\n", dev->name , dev->path);
 	return dev;
 }
-
-
-

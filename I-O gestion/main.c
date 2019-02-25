@@ -11,7 +11,7 @@
  * hs 	: Hugo SCHAAF, producer
  *
  * 11/08/2017
- * version 1.0
+ * version 1.8
  * SCHAAF Hugo*/
 
 // common headers //
@@ -23,6 +23,7 @@
 
 #include "serialio_unix.h"
 #include "devicectl.h"
+#include "devicecmd.h"
 
 // serial communication speed
 #define BAUD B9600	// according to termios
@@ -49,7 +50,7 @@ int main(int argc, char **argv){
 	// Initialization
 
 	devInit(device_ptr, "LC251hs", argv[1], BAUD, &old_tty);
-
+	
 	if(devConnect(device_ptr) == device_ptr)
 	{
 		// /* load the settings */

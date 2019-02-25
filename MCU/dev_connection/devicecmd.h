@@ -21,7 +21,7 @@
 
 // commands
 #define DCERR   0x00
-#define DCGETID 1 // get the device identifier
+#define DCGETID 0x01 // get the device identifier
 #define DCCNCT	0x02 // device connected
 #define DCDSCT	0x03 // device disconnected
 
