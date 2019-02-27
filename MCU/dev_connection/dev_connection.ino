@@ -7,7 +7,9 @@
  */
 #include "devicecmd.h"
 
-int8_t getCmd()
+#define LED 13
+
+static int8_t getCmd()
 {	
 	char buf[CMDMAXSIZE] = "";
   char* tmp = buf;
@@ -33,15 +35,19 @@ int8_t getCmd()
 void setup()
 {
 	Serial.begin(9600);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
+  pinMode(LED, OUTPUT);
+
+  // mark a pause before continuing
+  Serial.flush();
+  Serial.write("Init from LC251hs");
+  digitalWrite(LED, HIGH);
+  delay(1000);
+  digitalWrite(LED, LOW);
 }
 
 void loop()
 {
 	int8_t cmd;
-
-  digitalWrite(13, LOW);
 
 	if(Serial.available())
 	{
@@ -51,21 +57,24 @@ void loop()
   	{
   		case DCGETID :
 
-        digitalWrite(13, HIGH);
-        delay(500);
+        digitalWrite(LED, HIGH);
+        delay(1000);
   			Serial.print("ID LC251hs ;");
         break;
 
       case DCDSCT :
 
-        digitalWrite(13, HIGH);
-        delay(500);
+        digitalWrite(LED, HIGH);
+        delay(1000);
         Serial.print(String{DCDSCT}+';'); 
         break;
   
   		default:
         Serial.print("DCERR;");
   	}
+
+    digitalWrite(LED, LOW);
+
 	}
 
   Serial.flush();

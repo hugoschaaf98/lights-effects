@@ -16,7 +16,8 @@ static void devReadMsg(int fd, char* buf)
 	int count =  0;
 	do
 	{
-		count+=sio_read(fd, buf, 1);
+		sio_read(fd, buf, 1);
+		count++;
 		dbg("\n-- : %c", *buf);
 	}while(*buf++ != ';' && count < MSGMAXSIZE);
 }
@@ -24,7 +25,7 @@ static void devReadMsg(int fd, char* buf)
 
 //---------------------------------------------------------------------------------------------------
 
-Device* devInit(Device* dev, const char* name, const char* path, int baud, struct termios* old_tty_ptr)
+Device* devInit(Device* dev, const char* name, const char* path, int baud)
 {
 	// check the name of each string
 	if(strlen(name) > MAXNAME || strlen(path) > MAXPATH)
@@ -33,23 +34,17 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 		return NULL;
 	}
 
-	if(old_tty_ptr == NULL)
-	{
-		fprintf(stderr, "dev_init(). struct termios* can't be NULL.\n");
-		return NULL;
-	}
-
 	strcpy(dev->name, name);
 	strcpy(dev->path, path);
 	dev->baud = baud;
-	dev->old_tty_ptr = old_tty_ptr;
+	dev->old_tty_ptr = (struct termios*)malloc(sizeof(struct termios));
 
 	return dev;
 }
 
 //-----------------------------------------------------------------------------------------
 // connect the device to the Pc
-// return dev on succes or NULL on fail
+// returns dev on succes or NULL on fail
 //
  Device* devConnect(Device* dev)
 {
@@ -61,7 +56,7 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	if(dev->fd == -1)
 	{
 		perror("dev_connect()");
-		fprintf(stderr, "Please make sure that <%s> refers to the proper device.\n", dev->path);
+		fprintf(stderr, "1Please make sure that <%s> refers to the proper device.\n", dev->path);
 		return NULL;
 	}
 
@@ -76,6 +71,8 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	devWriteCmd(dev->fd, DCGETID);	// get the device identifier
 	tcdrain(dev->fd);				// wait the transmission to complete
 	dbg("read\n");
+	// just for debug
+	memset(io_buf, 0, sizeof(io_buf)*sizeof(char));
 	devReadMsg(dev->fd, io_buf);	// get the response of the device
 
 	dbg("\nretreive device's ID\n");
@@ -91,7 +88,7 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud, struc
 	{
 		restore_old_tty(dev->fd, dev->old_tty_ptr);
 		close(dev->fd);
-		fprintf(stderr, "Unable to connect.\nPlease make sure that <%s> refers to the proper device.\n", dev->path);
+		fprintf(stderr, "dev_connect() : Unable to connect.\n2Please make sure that <%s> refers to the proper device.\n", dev->path);
 		return NULL;
 	}
 }// end devConnect()

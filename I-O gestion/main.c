@@ -14,6 +14,8 @@
  * version 1.8
  * SCHAAF Hugo*/
 
+#define DEBUG
+
 // common headers //
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,8 +37,6 @@
 
 int main(int argc, char **argv){
 
-	struct termios old_tty;
-
 	Device device;
 	Device* device_ptr = &device;
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv){
 	//------------------------------------------------------------------------------------------------------//
 	// Initialization
 
-	devInit(device_ptr, "LC251hs", argv[1], BAUD, &old_tty);
+	devInit(device_ptr, "LC251hs", argv[1], BAUD);
 	
 	if(devConnect(device_ptr) == device_ptr)
 	{
@@ -64,6 +64,7 @@ int main(int argc, char **argv){
 		// }
 
 		// /* send the commands */
+		sleep(2);
 
 		devDisconnect(device_ptr);
 	}

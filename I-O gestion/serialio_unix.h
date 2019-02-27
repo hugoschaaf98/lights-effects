@@ -16,11 +16,13 @@
 # error please select the proper header file for your OS
 #endif
 
-// #ifdef DEBUG
-//     #define dbg(...) fprintf(stderr, __VA_ARGS__)
-// #else
-//     #define dbg(...)
-// #endif
+#ifndef dbg
+#ifdef DEBUG
+    #define dbg(...) fprintf(stderr, __VA_ARGS__)
+#else
+    #define dbg(...)
+#endif
+#endif
 
 /* specifics headers */
 #include <fcntl.h>
@@ -45,7 +47,7 @@
  */
 int sio_open(const char* path, int o_flags);
 
-/*Initialize the serial io port*/
+/* Initialize the serial io port */
 int sio_init(int fd, speed_t baud);
 
 /* read and write operations.

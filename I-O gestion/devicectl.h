@@ -9,30 +9,32 @@
 #ifndef DEVICECTL_H
 #define DEVICECTL_H
 
+// #define DEBUG
+
 #ifndef __linux__
 # error "please select the proper header file for your OS\n"
 #endif
 
 #include <stdio.h>	 // io management
-#include <stdlib.h>	 //
+#include <stdlib.h>	 // for malloc
 #include <string.h>	 // string utils
 #include <termios.h> // terminal control
 
 #include "serialio_unix.h"	// serial communication management
 #include "devicecmd.h"		// device commands definitions
 
-#define DEBUG
-
+#ifndef dbg
+//#warning "dbg not defined"
 #ifdef DEBUG
     #define dbg(...) fprintf(stderr, __VA_ARGS__)
-#endif
-//#else
-#ifndef DEBUG
+#else
     #define dbg(...)
+#endif
 #endif
 
 //----------------------------------------------------------------------------------------------------------
 // Device definitions
+//
 struct Device
 {
 	char name[MAXNAME];		// name of the device
@@ -43,7 +45,9 @@ struct Device
 };
 typedef struct Device Device;
 
-Device* devInit(Device* dev, const char* name, const char* path, int baud, struct termios* old_tty_ptr);
+// Initialize a device structure
+// 
+Device* devInit(Device* dev, const char* name, const char* path, int baud);
 Device* devConnect(Device* device);
 Device* devDisconnect(Device* dev);
 
