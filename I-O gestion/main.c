@@ -14,7 +14,7 @@
  * version 1.8
  * SCHAAF Hugo*/
 
-#define DEBUG
+//#define DEBUG
 
 // common headers //
 #include <stdio.h>
@@ -29,6 +29,12 @@
 
 // serial communication speed
 #define BAUD B9600	// according to termios
+
+static void waitForKeypress(void)
+{
+		char c;
+		read(STDIN_FILENO, &c, 1);
+}
 
 
 /*******************************************/
@@ -64,7 +70,8 @@ int main(int argc, char **argv){
 		// }
 
 		// /* send the commands */
-		sleep(2);
+		puts("Press any key to continue...");
+		waitForKeypress();
 
 		devDisconnect(device_ptr);
 	}
@@ -72,6 +79,6 @@ int main(int argc, char **argv){
 	return EXIT_SUCCESS;
 }
 
-/////////////////////////////////////////////
-//                   END                   //
-/////////////////////////////////////////////
+/*******************************************/
+/*                END                      */
+/*******************************************/

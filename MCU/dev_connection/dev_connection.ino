@@ -2,12 +2,21 @@
  *
  *
  * Test the device connection 
+ * 
+ * ***WARNING***  
+ * changing the serial port settings from 
+ * the computer side causes the arduino
+ * to reset. Place a 10µF condo between
+ * to avoid this.
+ * *************
  *
- *
+ * SCHAAF Hugo 27/02/2019                 
  */
 #include "devicecmd.h"
 
-#define LED 13
+#define BLUELED   4
+#define REDLED    5
+#define GREENLED  6
 
 static int8_t getCmd()
 {	
@@ -34,16 +43,17 @@ static int8_t getCmd()
 
 void setup()
 {
-	Serial.begin(9600);
-  pinMode(LED, OUTPUT);
+  pinMode(BLUELED, OUTPUT);
+  pinMode(REDLED, OUTPUT);
+  pinMode(GREENLED, OUTPUT);
 
-  // mark a pause before continuing
-  Serial.flush();
-  Serial.write("Init from LC251hs");
-  digitalWrite(LED, HIGH);
+  digitalWrite(BLUELED, HIGH);
   delay(1000);
-  digitalWrite(LED, LOW);
+  digitalWrite(BLUELED, LOW);
+
+  Serial.begin(9600);
 }
+
 
 void loop()
 {
@@ -57,25 +67,32 @@ void loop()
   	{
   		case DCGETID :
 
-        digitalWrite(LED, HIGH);
-        delay(1000);
   			Serial.print("ID LC251hs ;");
+
+        digitalWrite(BLUELED, HIGH);
+        delay(500);
+        digitalWrite(BLUELED, LOW);
         break;
+
+      case DCCNCT :
+
+        Serial.print(String{DCCNCT}+';'); 
+        digitalWrite(REDLED, LOW);
+        digitalWrite(GREENLED, HIGH);
+        break;
+
 
       case DCDSCT :
 
-        digitalWrite(LED, HIGH);
-        delay(1000);
         Serial.print(String{DCDSCT}+';'); 
+        digitalWrite(REDLED, HIGH);
+        digitalWrite(GREENLED, LOW);
         break;
   
   		default:
         Serial.print("DCERR;");
   	}
 
-    digitalWrite(LED, LOW);
-
 	}
-
   Serial.flush();
 }

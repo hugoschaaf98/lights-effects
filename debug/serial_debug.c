@@ -6,8 +6,10 @@
  * 27/02/2019
  */
 
-#include <fcntl.h>
+#include <stdio.h>
 #include <unistd.h>
+#include <termios.h>
+
 #include "serialio_unix.h"
 
 
@@ -24,21 +26,25 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	int stream_fd = open(argv[1], O_NONBLOCK | O_N0CTTY | O_RDONLY);
+	// open the terminal
+	int fd = sio_open(argv[1], O_NOCTTY | O_RDWR);
 
-	if(dev->fd == -1)
+	if(fd == -1)
 	{
 		perror("open()");
 		fprintf(stderr, "Please make sure that <%s> refers to the proper file.\n", argv[1]);
-		return NULL;
+		exit(EXIT_FAILURE);
 	}
 
-	// input buffer
-	char i_buf[BUFFER_SIZE] = "";
+	// init the port
+	struct termios old_tty;
+	save_old_tty(fd, &old_tty);
+	sio_init(fd, B9600);
 
-	for(;;)
-	{
-	}
+	puts("Port initialized\n");
+	sleep(1);
+	restore_old_tty(fd, &old_tty);
+	puts("Port restored\nDone.\n");
 
 	return 0;
 }

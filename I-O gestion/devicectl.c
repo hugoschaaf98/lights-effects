@@ -37,7 +37,6 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud)
 	strcpy(dev->name, name);
 	strcpy(dev->path, path);
 	dev->baud = baud;
-	dev->old_tty_ptr = (struct termios*)malloc(sizeof(struct termios));
 
 	return dev;
 }
@@ -56,13 +55,14 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud)
 	if(dev->fd == -1)
 	{
 		perror("dev_connect()");
-		fprintf(stderr, "1Please make sure that <%s> refers to the proper device.\n", dev->path);
+		fprintf(stderr, "Please make sure that <%s> refers to the proper device.\n", dev->path);
 		return NULL;
 	}
 
 	// save and configure the port
+	dev->old_tty_ptr = (struct termios*)malloc(sizeof(struct termios));
 	save_old_tty(dev->fd, dev->old_tty_ptr);
-	sio_init(dev->fd, B9600);
+	sio_init(dev->fd, (speed_t)dev->baud);
 
 	// identify the device
 	char io_buf[MSGMAXSIZE] = "";	// device name's container
@@ -71,8 +71,7 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud)
 	devWriteCmd(dev->fd, DCGETID);	// get the device identifier
 	tcdrain(dev->fd);				// wait the transmission to complete
 	dbg("read\n");
-	// just for debug
-	memset(io_buf, 0, sizeof(io_buf)*sizeof(char));
+	clearBuf(io_buf, sizeof(io_buf)*sizeof(char));
 	devReadMsg(dev->fd, io_buf);	// get the response of the device
 
 	dbg("\nretreive device's ID\n");
@@ -80,7 +79,8 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud)
 	sscanf(io_buf, "ID %s ;", io_buf);						// retreive the device's name
 	
 	if( strncmp(io_buf, dev->name, strlen(dev->name)) == 0 )	// if names equal (discount the '\0' of dev->name)
-	{ 
+	{
+		devWriteCmd(dev->fd, DCCNCT);
 		printf("<%s> found at <%s> successfully connected.\n", dev->name, dev->path);
 		return dev;
 	}
@@ -88,7 +88,8 @@ Device* devInit(Device* dev, const char* name, const char* path, int baud)
 	{
 		restore_old_tty(dev->fd, dev->old_tty_ptr);
 		close(dev->fd);
-		fprintf(stderr, "dev_connect() : Unable to connect.\n2Please make sure that <%s> refers to the proper device.\n", dev->path);
+		fprintf(stderr, "dev_connect() : Unable to connect. Incorrect device name .\n"
+							"<%s> expected but <%s> received.\n", io_buf, dev->name);
 		return NULL;
 	}
 }// end devConnect()
@@ -103,14 +104,17 @@ Device* devDisconnect(Device* dev)
 	printf("Waiting for <%s> at <%s> to disconnect.\n", dev->name, dev->path);
 
 	// try to disconnect the device
-	char buf[MSGMAXSIZE] = "";
+	char io_buf[MSGMAXSIZE] = "";
 	int cmd = -1;
 	int attempts = 0;
 	do
 	{
-		devWriteCmd(dev->fd, DCDSCT);		// send disconnect command
-		devReadMsg(dev->fd, buf);			// get the response of the device
-		sscanf(buf, "%d;", &cmd);		// parse the response
+		tcflush(dev->fd, TCIOFLUSH);	// flush both input/output buffers to avoid errors
+		devWriteCmd(dev->fd, DCDSCT);	// send disconnect command
+		tcdrain(dev->fd);				// wait the transmission to complete
+		clearBuf(io_buf, sizeof(io_buf)*sizeof(char));
+		devReadMsg(dev->fd, io_buf);	// get the response of the device
+		sscanf(io_buf, "%d;", &cmd);	// parse the response
 		putchar('.');
 		attempts++;
 	}
@@ -125,6 +129,7 @@ Device* devDisconnect(Device* dev)
 
 	// else restore the tty
 	restore_old_tty(dev->fd, dev->old_tty_ptr);
+	free(dev->old_tty_ptr);
 	close(dev->fd);
 	printf("\n<%s> at <%s> successfully disconnected.\n", dev->name , dev->path);
 	return dev;

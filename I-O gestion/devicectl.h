@@ -9,7 +9,7 @@
 #ifndef DEVICECTL_H
 #define DEVICECTL_H
 
-// #define DEBUG
+//#define DEBUG
 
 #ifndef __linux__
 # error "please select the proper header file for your OS\n"
@@ -46,7 +46,9 @@ struct Device
 typedef struct Device Device;
 
 // Initialize a device structure
-// 
+//
+#define clearBuf(ptr, sz) memset(ptr, 0, sz) // clear the i/o buffer
+
 Device* devInit(Device* dev, const char* name, const char* path, int baud);
 Device* devConnect(Device* device);
 Device* devDisconnect(Device* dev);

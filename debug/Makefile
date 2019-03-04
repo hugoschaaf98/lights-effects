@@ -14,19 +14,11 @@ clang=0
 # make emcc=0 --> target the native platform rather than javascript
 emcc=0
 
-#----------------------------------------------------------------------------
-# Hugo adds
-#
-# make debug=1 --> enable debug prints
-# make debug=0 --> disable debug prints
-debug=0
-#----------------------------------------------------------------------------
-
 #~~~~ build library or programs ~~~~
 # if LIB_TARGET is provided, this library will be built (with its
 # platform-specific name), otherwise ${EXE_PREFIX}* programs will be built
 LIB_TARGET=
-EXE_PREFIX=main
+EXE_PREFIX=serial_debug
 
 #~~~~ detect operating system ~~~~
 ifneq (${OS},Windows_NT)
