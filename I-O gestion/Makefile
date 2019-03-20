@@ -1,8 +1,16 @@
 #-----------------------------------------------------------------------------
+# 
+# light effects project
 #
 # this GNU-makefile relies on the GCC toolchain
 # nb: on Windows, the Mingw-w64 package provides the mingw32-make.exe command
 #     ( see http://www.enib.fr/~harrouet/s4prc/#environ.windows )
+#
+#	Adapted and widely modified by
+#	Hugo Schaaf - ( see https://github.com/hugoschaaf98/ )
+# 2019-03-10
+#
+#-----------------------------------------------------------------------------
 
 
 #---- control global settings ------------------------------
@@ -17,7 +25,19 @@ clang=0
 # make emcc=0 --> target the native platform rather than javascript
 emcc=0
 
+#---- directories ------------------------------
+#
+# headers directory
+DINC=include/
+# source directory
+DSRC=src/
+# object directory
+DOBJ=obj/
+# executable directory
+DBIN=bin/
+
 #---- build program ------------------------------
+#
 # ${EXE_PREFIX}* programs will be built
 EXE_PREFIX=main
 
@@ -39,13 +59,10 @@ endif
 
 #---- adjust project-specific settings -----------------------------
 #
-# directories
-DINC=include/
-DSRC=src/
-DOBJ=obj/
-DBIN=bin/
-
-CPPFLAGS=-I${DINC}
+CPPFLAGS=
+ifneq (${strip ${DINC}},)
+	CPPFLAGS+=-I${DINC}
+endif
 LDFLAGS=
 # LDFLAGS+=-L library/path -Wl,-rpath,library/path -l library_name
 CFLAGS=
@@ -67,9 +84,9 @@ else
 	else ifeq (${OS},Raspbian)
 	  # some warnings may appear when mixing g++-6 and g++-7 on Raspbian
 	  CXXFLAGS+=-Wno-psabi
-	else
-	  # nothing special for now
-	endif
+		else
+	  	# nothing special for now
+		endif
   endif
 endif
 
@@ -118,13 +135,17 @@ ifeq (${strip ${emcc}},1)
   GENERATED_FILES+=${patsubst %.html,%.html.mem,${EXE_FILE}}
 endif
 
-# euh ???
-# GENERATED_FILES+=${wildcard output_* *~ core}
-# GENERATED_FILES+=${wildcard .[1-9]}
-# GENERATED_FILES+=${wildcard .[1-9][0-9]}
-# GENERATED_FILES+=${wildcard .[1-9][0-9][0-9]}
-# GENERATED_FILES+=${wildcard .[1-9][0-9][0-9][0-9]}
-# GENERATED_FILES+=${wildcard .[1-9][0-9][0-9][0-9][0-9]}
+# adjustments for the clean target :
+# some editors generates files ending by "~"
+# and when a program fails core or .<pid> files are sometimes 
+# generated where <pid> represents the PID number of the
+# process (from 1 up tu 5 characters)
+GENERATED_FILES+=${wildcard *~ core}
+GENERATED_FILES+=${wildcard .[1-9]}
+GENERATED_FILES+=${wildcard .[1-9][0-9]}
+GENERATED_FILES+=${wildcard .[1-9][0-9][0-9]}
+GENERATED_FILES+=${wildcard .[1-9][0-9][0-9][0-9]}
+GENERATED_FILES+=${wildcard .[1-9][0-9][0-9][0-9][0-9]}
 
 #---- compiler/linker settings ------------------------------
 #
