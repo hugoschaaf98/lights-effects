@@ -1,0 +1,4 @@
+I-O\ gestion/bin/*
+I-O\ gestion/obj/*
+*.d
+*.o
